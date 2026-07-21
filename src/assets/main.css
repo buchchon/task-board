@@ -122,3 +122,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* The sortable placeholder left where a dragged card will land — doubles as
+   the "target column highlight" from the design spec, without needing
+   separate dragenter/dragleave tracking per column. */
+.drag-ghost {
+  @apply rounded-md border-2 border-dashed border-primary/40 bg-primary/5 opacity-70;
+}
+.drag-ghost > * {
+  @apply invisible;
+}

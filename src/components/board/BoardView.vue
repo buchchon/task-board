@@ -20,6 +20,7 @@ const { tasksByStatus, isLoading, error } = useTasks()
         v-for="column in COLUMNS"
         :key="column.status"
         :label="column.label"
+        :status="column.status"
         :tasks="tasksByStatus(column.status)"
         :is-loading="isLoading"
       />

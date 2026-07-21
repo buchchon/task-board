@@ -28,7 +28,8 @@
       "Read(//Users/poonb/.supabase/**)",
       "Read(//Users/poonb/Library/**)",
       "Bash(node *)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(npx shadcn-vue@latest add dialog input)"
     ]
   }
 }

@@ -1,13 +1,46 @@
 <script setup lang="ts">
-import type { Task } from '@/types/task'
+import { ref, watch } from 'vue'
+import draggable from 'vuedraggable'
+import type { Task, TaskStatus } from '@/types/task'
+import { useTasks } from '@/composables/useTasks'
 import TaskCard from './TaskCard.vue'
 import TaskCardSkeleton from './TaskCardSkeleton.vue'
 
-defineProps<{
+const props = defineProps<{
   label: string
+  status: TaskStatus
   tasks: Task[]
   isLoading: boolean
 }>()
+
+const { updateTaskStatus } = useTasks()
+
+// vuedraggable needs a writable array to bind v-model to (the `tasks` prop
+// is a filtered computed, not writable). This local copy is kept in sync
+// with the shared task list below; vuedraggable mutates it directly during
+// a drag for instant visual feedback, ahead of the actual persistence.
+const items = ref<Task[]>([...props.tasks])
+
+watch(
+  () => props.tasks,
+  (next) => {
+    items.value = [...next]
+  },
+)
+
+interface ChangeEvent {
+  added?: { element: Task }
+}
+
+// Only "added" matters here: a card landing in this column (from this column
+// or another) means its status should become this column's status. The
+// source column's own "removed" event needs no handling — the status write
+// below is what actually moves the task between columns' filtered lists.
+function handleChange(event: ChangeEvent) {
+  if (event.added) {
+    updateTaskStatus(event.added.element.id, props.status)
+  }
+}
 </script>
 
 <template>
@@ -19,18 +52,34 @@ defineProps<{
       </span>
     </header>
 
-    <div class="flex flex-col gap-2">
-      <template v-if="isLoading">
+    <template v-if="isLoading">
+      <div class="flex flex-col gap-2">
         <TaskCardSkeleton v-for="n in 2" :key="n" />
-      </template>
-      <template v-else-if="tasks.length === 0">
-        <p class="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
-          No tasks yet
-        </p>
-      </template>
-      <template v-else>
-        <TaskCard v-for="task in tasks" :key="task.id" :task="task" />
-      </template>
-    </div>
+      </div>
+    </template>
+    <template v-else>
+      <draggable
+        v-model="items"
+        group="tasks"
+        item-key="id"
+        animation="150"
+        ghost-class="drag-ghost"
+        :force-fallback="true"
+        class="flex min-h-16 flex-col gap-2"
+        @change="handleChange"
+      >
+        <template #item="{ element }">
+          <TaskCard :task="element" />
+        </template>
+        <template #footer>
+          <p
+            v-if="items.length === 0"
+            class="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground"
+          >
+            No tasks yet
+          </p>
+        </template>
+      </draggable>
+    </template>
   </section>
 </template>
