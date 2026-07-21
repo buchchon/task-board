@@ -36,7 +36,7 @@ const dueDateStyles = {
 
 <template>
   <article
-    class="rounded-md border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md"
+    class="select-none rounded-md border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
   >
     <h3 class="text-sm font-medium leading-snug text-card-foreground">{{ task.title }}</h3>
     <p v-if="task.description" class="mt-1 line-clamp-2 text-xs text-muted-foreground">
