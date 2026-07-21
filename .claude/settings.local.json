@@ -20,7 +20,15 @@
       "Bash(npm run *)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "Bash(gh repo *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Skill(claude-in-chrome)",
+      "Bash(pkill -f \"node /Users/poonb/Downloads/task_board/node_modules/.bin/vite\")",
+      "Read(//Users/poonb/.supabase/**)",
+      "Read(//Users/poonb/Library/**)",
+      "Bash(node *)",
+      "Read(//private/tmp/**)"
     ]
   }
 }
