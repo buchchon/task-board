@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Task } from '@/types/task'
+import { labelColorStyles } from '@/types/label'
 
 const props = defineProps<{ task: Task }>()
 const emit = defineEmits<{ select: [task: Task] }>()
@@ -62,6 +63,15 @@ function handlePointerUp(event: PointerEvent) {
     @pointerdown="handlePointerDown"
     @pointerup="handlePointerUp"
   >
+    <div v-if="task.labels.length > 0" class="mb-1.5 flex flex-wrap items-center gap-1">
+      <span
+        v-for="l in task.labels"
+        :key="l.id"
+        :class="['rounded px-1.5 py-0.5 text-[10px] font-medium', labelColorStyles[l.color]]"
+      >
+        {{ l.name }}
+      </span>
+    </div>
     <h3 class="text-sm font-medium leading-snug text-card-foreground">{{ task.title }}</h3>
     <p v-if="task.description" class="mt-1 line-clamp-2 text-xs text-muted-foreground">
       {{ task.description }}

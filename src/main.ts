@@ -5,6 +5,7 @@ import App from './App.vue'
 import router from './router'
 import { useAuth } from './composables/useAuth'
 import { useTasks } from './composables/useTasks'
+import { useLabels } from './composables/useLabels'
 
 const app = createApp(App)
 
@@ -18,5 +19,5 @@ useAuth()
   .bootstrapGuestSession()
   .then(() => {
     app.mount('#app')
-    return useTasks().fetchTasks()
+    return Promise.all([useTasks().fetchTasks(), useLabels().fetchLabels()])
   })

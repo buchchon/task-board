@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import TaskFormDialog from './TaskFormDialog.vue'
+import LabelPicker from './LabelPicker.vue'
+import TaskActivityLog from './TaskActivityLog.vue'
 import { useTasks } from '@/composables/useTasks'
+import { useTaskActivity } from '@/composables/useTaskActivity'
+import { labelColorStyles } from '@/types/label'
 import type { Task } from '@/types/task'
 
 const props = defineProps<{ task: Task | null }>()
 const open = defineModel<boolean>('open', { required: true })
 
 const { deleteTask } = useTasks()
+const { fetchActivity } = useTaskActivity()
 
 const editOpen = ref(false)
 
@@ -18,6 +23,14 @@ const priorityStyles: Record<Task['priority'], string> = {
   normal: 'bg-secondary text-secondary-foreground',
   high: 'bg-destructive/10 text-destructive',
 }
+
+watch(
+  () => props.task,
+  (task) => {
+    if (task) fetchActivity(task.id)
+  },
+  { immediate: true },
+)
 
 async function handleDelete() {
   if (!props.task) return
@@ -45,6 +58,19 @@ async function handleDelete() {
             Due {{ task.due_date }}
           </span>
         </div>
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span
+            v-for="l in task.labels"
+            :key="l.id"
+            :class="['rounded px-1.5 py-0.5 text-xs font-medium', labelColorStyles[l.color]]"
+          >
+            {{ l.name }}
+          </span>
+          <LabelPicker :task="task" />
+        </div>
+
+        <TaskActivityLog />
       </div>
 
       <SheetFooter class="flex-row justify-between gap-2">

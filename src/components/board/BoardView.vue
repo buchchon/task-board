@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { COLUMNS } from '@/types/task'
-import type { Task } from '@/types/task'
+import type { Task, TaskStatus } from '@/types/task'
 import { useTasks } from '@/composables/useTasks'
 import BoardColumn from './BoardColumn.vue'
+import LabelFilter from './LabelFilter.vue'
 import TaskDetailPanel from '@/components/task/TaskDetailPanel.vue'
 
 const { tasksByStatus, isLoading, error } = useTasks()
 
 const selectedTask = ref<Task | null>(null)
+const selectedLabelIds = ref<string[]>([])
+
+function filteredTasks(status: TaskStatus) {
+  const tasks = tasksByStatus(status)
+  if (selectedLabelIds.value.length === 0) return tasks
+  return tasks.filter((task) => task.labels.some((label) => selectedLabelIds.value.includes(label.id)))
+}
 </script>
 
 <template>
@@ -20,13 +28,17 @@ const selectedTask = ref<Task | null>(null)
       {{ error }}
     </div>
 
+    <div class="mb-4 flex justify-end">
+      <LabelFilter v-model:selected="selectedLabelIds" />
+    </div>
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <BoardColumn
         v-for="column in COLUMNS"
         :key="column.status"
         :label="column.label"
         :status="column.status"
-        :tasks="tasksByStatus(column.status)"
+        :tasks="filteredTasks(column.status)"
         :is-loading="isLoading"
         @select-task="selectedTask = $event"
       />

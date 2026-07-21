@@ -1,6 +1,11 @@
 import { ref, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
 import type { Task, TaskStatus, TaskPriority } from '@/types/task'
+import { STATUS_LABELS } from '@/types/task'
+import type { Label } from '@/types/label'
+import { useTaskActivity } from './useTaskActivity'
+
+const { logActivity } = useTaskActivity()
 
 // Module-level (singleton) state, same pattern as useAuth: one shared task
 // list for the whole app, not per-component state.
@@ -21,13 +26,18 @@ async function fetchTasks() {
 
   const { data, error: fetchError } = await supabase
     .from('tasks')
-    .select('*')
+    .select('*, task_labels(labels(*))')
     .order('created_at', { ascending: true })
 
   if (fetchError) {
     error.value = 'Could not load tasks. Please refresh the page.'
   } else {
-    tasks.value = data ?? []
+    // Flatten the join (tasks -> task_labels -> labels) into a plain labels
+    // array on each task; nothing downstream needs the join shape itself.
+    tasks.value = (data ?? []).map(({ task_labels, ...task }) => ({
+      ...task,
+      labels: (task_labels ?? []).map((tl: { labels: Label }) => tl.labels),
+    }))
   }
 
   isLoading.value = false
@@ -54,7 +64,8 @@ async function createTask(fields: TaskFields) {
     return
   }
 
-  tasks.value.push(data)
+  tasks.value.push({ ...data, labels: [] })
+  await logActivity(data.id, 'created', 'Created task')
 }
 
 async function updateTask(taskId: string, fields: TaskFields) {
@@ -75,6 +86,22 @@ async function updateTask(taskId: string, fields: TaskFields) {
   if (updateError) {
     Object.assign(task, previous)
     error.value = 'Could not update task. Please try again.'
+    return
+  }
+
+  // One activity line per field that actually changed, not a generic "edited".
+  if (previous.title !== patch.title) {
+    await logActivity(taskId, 'edited', `Renamed to "${patch.title}"`)
+  }
+  if (previous.description !== patch.description) {
+    await logActivity(taskId, 'edited', 'Updated description')
+  }
+  if (previous.priority !== patch.priority) {
+    const label = patch.priority.charAt(0).toUpperCase() + patch.priority.slice(1)
+    await logActivity(taskId, 'edited', `Changed priority to ${label}`)
+  }
+  if (previous.due_date !== patch.due_date) {
+    await logActivity(taskId, 'edited', patch.due_date ? `Set due date to ${patch.due_date}` : 'Cleared due date')
   }
 }
 
@@ -91,7 +118,10 @@ async function updateTaskStatus(taskId: string, status: TaskStatus) {
   if (updateError) {
     task.status = previousStatus
     error.value = 'Could not move task. Please try again.'
+    return
   }
+
+  await logActivity(taskId, 'status_change', `Moved ${STATUS_LABELS[previousStatus]} → ${STATUS_LABELS[status]}`)
 }
 
 async function deleteTask(taskId: string) {
@@ -106,6 +136,44 @@ async function deleteTask(taskId: string) {
   if (deleteError) {
     tasks.value.splice(index, 0, removed)
     error.value = 'Could not delete task. Please try again.'
+  }
+}
+
+async function toggleTaskLabel(taskId: string, label: Label, attach: boolean) {
+  const task = tasks.value.find((t) => t.id === taskId)
+  if (!task) return
+
+  if (attach) {
+    if (task.labels.some((l) => l.id === label.id)) return
+    task.labels.push(label)
+
+    const { error: insertError } = await supabase.from('task_labels').insert({ task_id: taskId, label_id: label.id })
+
+    if (insertError) {
+      task.labels = task.labels.filter((l) => l.id !== label.id)
+      error.value = 'Could not add label. Please try again.'
+      return
+    }
+
+    await logActivity(taskId, 'label_added', `Added label "${label.name}"`)
+  } else {
+    const index = task.labels.findIndex((l) => l.id === label.id)
+    if (index === -1) return
+    task.labels.splice(index, 1)
+
+    const { error: deleteError } = await supabase
+      .from('task_labels')
+      .delete()
+      .eq('task_id', taskId)
+      .eq('label_id', label.id)
+
+    if (deleteError) {
+      task.labels.splice(index, 0, label)
+      error.value = 'Could not remove label. Please try again.'
+      return
+    }
+
+    await logActivity(taskId, 'label_removed', `Removed label "${label.name}"`)
   }
 }
 
@@ -124,5 +192,6 @@ export function useTasks() {
     updateTask,
     updateTaskStatus,
     deleteTask,
+    toggleTaskLabel,
   }
 }
