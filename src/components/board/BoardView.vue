@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { COLUMNS } from '@/types/task'
+import type { Task } from '@/types/task'
 import { useTasks } from '@/composables/useTasks'
 import BoardColumn from './BoardColumn.vue'
+import TaskDetailPanel from '@/components/task/TaskDetailPanel.vue'
 
 const { tasksByStatus, isLoading, error } = useTasks()
+
+const selectedTask = ref<Task | null>(null)
 </script>
 
 <template>
@@ -23,7 +28,14 @@ const { tasksByStatus, isLoading, error } = useTasks()
         :status="column.status"
         :tasks="tasksByStatus(column.status)"
         :is-loading="isLoading"
+        @select-task="selectedTask = $event"
       />
     </div>
+
+    <TaskDetailPanel
+      :task="selectedTask"
+      :open="selectedTask !== null"
+      @update:open="(v) => { if (!v) selectedTask = null }"
+    />
   </main>
 </template>

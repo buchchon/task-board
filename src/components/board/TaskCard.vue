@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { Task } from '@/types/task'
 
 const props = defineProps<{ task: Task }>()
+const emit = defineEmits<{ select: [task: Task] }>()
 
 const priorityStyles: Record<Task['priority'], string> = {
   low: 'bg-muted text-muted-foreground',
@@ -32,11 +33,34 @@ const dueDateStyles = {
   soon: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
   normal: 'bg-muted text-muted-foreground',
 }
+
+// vuedraggable's force-fallback mode (needed for drag to work at all — see
+// BoardColumn) intercepts the mouse interaction in a way that sometimes
+// swallows the native `click` event entirely, even for a plain click with no
+// movement. So "was this a click or a drag" is detected manually here by
+// comparing pointerdown/pointerup position, instead of relying on `click`.
+let pointerDownAt: { x: number; y: number } | null = null
+
+function handlePointerDown(event: PointerEvent) {
+  pointerDownAt = { x: event.clientX, y: event.clientY }
+}
+
+function handlePointerUp(event: PointerEvent) {
+  if (!pointerDownAt) return
+  const movedX = Math.abs(event.clientX - pointerDownAt.x)
+  const movedY = Math.abs(event.clientY - pointerDownAt.y)
+  pointerDownAt = null
+  if (movedX < 5 && movedY < 5) {
+    emit('select', props.task)
+  }
+}
 </script>
 
 <template>
   <article
     class="select-none rounded-md border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
+    @pointerdown="handlePointerDown"
+    @pointerup="handlePointerUp"
   >
     <h3 class="text-sm font-medium leading-snug text-card-foreground">{{ task.title }}</h3>
     <p v-if="task.description" class="mt-1 line-clamp-2 text-xs text-muted-foreground">

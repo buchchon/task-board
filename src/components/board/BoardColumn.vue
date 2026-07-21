@@ -13,6 +13,8 @@ const props = defineProps<{
   isLoading: boolean
 }>()
 
+const emit = defineEmits<{ 'select-task': [task: Task] }>()
+
 const { updateTaskStatus } = useTasks()
 
 // vuedraggable needs a writable array to bind v-model to (the `tasks` prop
@@ -83,7 +85,7 @@ function handleEnd() {
         @end="handleEnd"
       >
         <template #item="{ element }">
-          <TaskCard :task="element" />
+          <TaskCard :task="element" @select="emit('select-task', $event)" />
         </template>
         <template #footer>
           <p
