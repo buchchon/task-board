@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew --version)",
+      "Bash(npm --version)",
+      "Bash(npm ls *)",
+      "Bash(npm -v)",
+      "Bash(zsh -lc 'gh auth status 2>&1; echo \"---\"; git config --global user.name; git config --global user.email; echo \"---\"; gh api user --jq .login 2>&1')",
+      "Bash(zsh -lc 'npm create vue@latest -- --help 2>&1 | head -60')",
+      "Bash(zsh -lc 'npm view vuedraggable versions --json 2>&1 | tail -20; echo \"---dist-tags---\"; npm view vuedraggable dist-tags 2>&1; echo \"---shadcn-vue---\"; npm view shadcn-vue version 2>&1; echo \"---tailwindcss---\"; npm view tailwindcss version 2>&1; echo \"---@tailwindcss/vite---\"; npm view @tailwindcss/vite version 2>&1')",
+      "Bash(zsh -lc 'npm view create-vue dist.tarball 2>&1')",
+      "Bash(curl -sL https://registry.npmjs.org/create-vue/-/create-vue-3.23.0.tgz)",
+      "Bash(tar -xzO package/bundle.js)",
+      "Bash(tar -xzO package/template/base/_gitignore)",
+      "Bash(rsync -a scaffold-tmp/ .)",
+      "Bash(rm -rf scaffold-tmp)",
+      "Bash(npm view *)",
+      "Bash(npx shadcn-vue@latest add button)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git reset *)"
+    ]
+  }
+}
