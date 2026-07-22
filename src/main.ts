@@ -1,6 +1,7 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
+import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 import App from './App.vue'
 import router from './router'
 import { useAuth } from './composables/useAuth'
@@ -10,6 +11,7 @@ import { useLabels } from './composables/useLabels'
 const app = createApp(App)
 
 app.use(router)
+app.use(autoAnimatePlugin)
 
 // Establish the guest session before mounting so every component can assume
 // a signed-in user is already present — no loading race between auth and data.

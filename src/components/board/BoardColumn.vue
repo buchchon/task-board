@@ -74,6 +74,7 @@ function handleEnd() {
     <template v-else>
       <draggable
         v-model="items"
+        v-auto-animate
         group="tasks"
         item-key="id"
         animation="150"

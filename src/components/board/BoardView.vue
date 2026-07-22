@@ -1,22 +1,34 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { X } from '@lucide/vue'
+import { X, Search } from '@lucide/vue'
 import { COLUMNS } from '@/types/task'
 import type { Task, TaskStatus } from '@/types/task'
 import { useTasks } from '@/composables/useTasks'
+import { Input } from '@/components/ui/input'
 import BoardColumn from './BoardColumn.vue'
 import LabelFilter from './LabelFilter.vue'
+import BoardStats from './BoardStats.vue'
 import TaskDetailPanel from '@/components/task/TaskDetailPanel.vue'
 
 const { tasksByStatus, isLoading, error } = useTasks()
 
 const selectedTask = ref<Task | null>(null)
 const selectedLabelIds = ref<string[]>([])
+const searchQuery = ref('')
 
 function filteredTasks(status: TaskStatus) {
-  const tasks = tasksByStatus(status)
-  if (selectedLabelIds.value.length === 0) return tasks
-  return tasks.filter((task) => task.labels.some((label) => selectedLabelIds.value.includes(label.id)))
+  let tasks = tasksByStatus(status)
+
+  if (selectedLabelIds.value.length > 0) {
+    tasks = tasks.filter((task) => task.labels.some((label) => selectedLabelIds.value.includes(label.id)))
+  }
+
+  const query = searchQuery.value.trim().toLowerCase()
+  if (query) {
+    tasks = tasks.filter((task) => task.title.toLowerCase().includes(query))
+  }
+
+  return tasks
 }
 </script>
 
@@ -37,8 +49,16 @@ function filteredTasks(status: TaskStatus) {
       </button>
     </div>
 
-    <div class="mb-4 flex justify-end">
-      <LabelFilter v-model:selected="selectedLabelIds" />
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <BoardStats />
+
+      <div class="flex items-center gap-2">
+        <div class="relative">
+          <Search class="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input v-model="searchQuery" placeholder="Search tasks" class="h-8 w-44 pl-8 text-sm" />
+        </div>
+        <LabelFilter v-model:selected="selectedLabelIds" />
+      </div>
     </div>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -14,7 +14,7 @@ const { activity, isLoading } = useTaskActivity()
       <div class="h-3 w-1/2 rounded bg-muted"></div>
     </div>
     <p v-else-if="activity.length === 0" class="mt-2 text-sm italic text-muted-foreground">No activity yet</p>
-    <ul v-else class="mt-2 space-y-2">
+    <ul v-else v-auto-animate class="mt-2 space-y-2">
       <li v-for="entry in activity" :key="entry.id" class="text-sm text-foreground">
         {{ entry.detail }}
         <span class="text-xs text-muted-foreground"> · {{ formatTimeAgo(new Date(entry.created_at)) }}</span>
