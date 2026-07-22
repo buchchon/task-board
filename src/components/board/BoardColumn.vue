@@ -80,7 +80,7 @@ function handleEnd() {
         ghost-class="drag-ghost"
         fallback-class="drag-fallback"
         :force-fallback="true"
-        class="flex min-h-16 flex-col gap-2"
+        class="flex min-h-16 flex-1 flex-col gap-2"
         @change="handleChange"
         @start="handleStart"
         @end="handleEnd"
