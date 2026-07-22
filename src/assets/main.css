@@ -140,12 +140,3 @@ body.dragging {
 .drag-ghost > * {
   @apply invisible;
 }
-
-/* force-fallback mode drags via a plain cloned DOM node that otherwise has no
-   visual distinction from a resting card — without this it just teleports
-   between columns with no "picked up" feel. This is the "card lifts with a
-   shadow" from the design spec; SortableJS positions the clone itself
-   (fixed + high z-index), this only styles it. */
-.drag-fallback {
-  @apply rotate-1 scale-105 cursor-grabbing shadow-xl;
-}
