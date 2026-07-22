@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useDark, useToggle } from '@vueuse/core'
-import { Sun, Moon } from '@lucide/vue'
+import { Sun, Moon, SquareKanban } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import TaskFormDialog from '@/components/task/TaskFormDialog.vue'
 
@@ -17,7 +17,12 @@ const toggleDark = useToggle(isDark)
 <template>
   <header class="border-b border-border">
     <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-      <span class="text-sm font-semibold tracking-tight">Kanban Task Board</span>
+      <div class="flex items-center gap-2">
+        <span class="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <SquareKanban class="size-4" />
+        </span>
+        <span class="text-sm font-semibold tracking-tight">Kanban Task Board</span>
+      </div>
       <div class="flex items-center gap-2">
         <Button
           variant="ghost"

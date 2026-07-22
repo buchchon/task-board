@@ -8,12 +8,13 @@ import TaskActivityLog from './TaskActivityLog.vue'
 import { useTasks } from '@/composables/useTasks'
 import { useTaskActivity } from '@/composables/useTaskActivity'
 import { labelColorStyles } from '@/types/label'
+import type { Label } from '@/types/label'
 import type { Task } from '@/types/task'
 
 const props = defineProps<{ task: Task | null }>()
 const open = defineModel<boolean>('open', { required: true })
 
-const { deleteTask } = useTasks()
+const { deleteTask, syncTaskLabels } = useTasks()
 const { fetchActivity } = useTaskActivity()
 
 const editOpen = ref(false)
@@ -36,6 +37,11 @@ async function handleDelete() {
   if (!props.task) return
   await deleteTask(props.task.id)
   open.value = false
+}
+
+function handleLabelsChange(next: Label[]) {
+  if (!props.task) return
+  syncTaskLabels(props.task.id, props.task.labels, next)
 }
 </script>
 
@@ -67,7 +73,7 @@ async function handleDelete() {
           >
             {{ l.name }}
           </span>
-          <LabelPicker :task="task" />
+          <LabelPicker :model-value="task.labels" @update:model-value="handleLabelsChange" />
         </div>
 
         <TaskActivityLog />

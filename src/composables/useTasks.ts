@@ -45,7 +45,7 @@ async function fetchTasks() {
 
 async function createTask(fields: TaskFields) {
   const title = fields.title.trim()
-  if (!title) return
+  if (!title) return null
 
   // user_id and status default server-side (see supabase/migrations).
   const { data, error: insertError } = await supabase
@@ -61,11 +61,13 @@ async function createTask(fields: TaskFields) {
 
   if (insertError) {
     error.value = 'Could not create task. Please try again.'
-    return
+    return null
   }
 
-  tasks.value.push({ ...data, labels: [] })
+  const task: Task = { ...data, labels: [] }
+  tasks.value.push(task)
   await logActivity(data.id, 'created', 'Created task')
+  return task
 }
 
 async function updateTask(taskId: string, fields: TaskFields) {
@@ -177,6 +179,18 @@ async function toggleTaskLabel(taskId: string, label: Label, attach: boolean) {
   }
 }
 
+// Reconciles a task's label set with a desired one — used by both the quick
+// toggle in the detail panel and the create/edit form's pending selection,
+// so the added/removed diffing logic isn't duplicated in either caller.
+async function syncTaskLabels(taskId: string, current: Label[], next: Label[]) {
+  const added = next.filter((l) => !current.some((c) => c.id === l.id))
+  const removed = current.filter((c) => !next.some((l) => l.id === c.id))
+  await Promise.all([
+    ...added.map((l) => toggleTaskLabel(taskId, l, true)),
+    ...removed.map((l) => toggleTaskLabel(taskId, l, false)),
+  ])
+}
+
 export function useTasks() {
   function tasksByStatus(status: TaskStatus) {
     return computed(() => tasks.value.filter((task) => task.status === status)).value
@@ -193,5 +207,6 @@ export function useTasks() {
     updateTaskStatus,
     deleteTask,
     toggleTaskLabel,
+    syncTaskLabels,
   }
 }

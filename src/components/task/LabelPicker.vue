@@ -5,15 +5,18 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useLabels } from '@/composables/useLabels'
-import { useTasks } from '@/composables/useTasks'
 import { LABEL_COLORS, DEFAULT_LABEL_COLOR, labelSwatchStyles } from '@/types/label'
 import type { Label, LabelColor } from '@/types/label'
-import type { Task } from '@/types/task'
 
-const props = defineProps<{ task: Task }>()
+// Controlled: this component never talks to the tasks table itself, it just
+// reports the desired label set. A task-detail-panel caller can apply each
+// change immediately (attach/detach on an existing task); a create/edit form
+// caller can hold it as pending state and only sync it on submit, once a
+// task id actually exists.
+const props = defineProps<{ modelValue: Label[] }>()
+const emit = defineEmits<{ 'update:modelValue': [Label[]] }>()
 
 const { labels, createLabel } = useLabels()
-const { toggleTaskLabel } = useTasks()
 
 const open = ref(false)
 const newLabelName = ref('')
@@ -21,11 +24,14 @@ const newLabelColor = ref<LabelColor>(DEFAULT_LABEL_COLOR)
 const isCreating = ref(false)
 
 function hasLabel(label: Label) {
-  return props.task.labels.some((l) => l.id === label.id)
+  return props.modelValue.some((l) => l.id === label.id)
 }
 
 function onToggle(label: Label, checked: boolean) {
-  toggleTaskLabel(props.task.id, label, checked)
+  emit(
+    'update:modelValue',
+    checked ? [...props.modelValue, label] : props.modelValue.filter((l) => l.id !== label.id),
+  )
 }
 
 async function handleCreate() {
@@ -34,7 +40,7 @@ async function handleCreate() {
 
   const created = await createLabel(newLabelName.value, newLabelColor.value)
   if (created) {
-    await toggleTaskLabel(props.task.id, created, true)
+    emit('update:modelValue', [...props.modelValue, created])
     newLabelName.value = ''
     newLabelColor.value = DEFAULT_LABEL_COLOR
   }
@@ -46,7 +52,12 @@ async function handleCreate() {
 <template>
   <Popover v-model:open="open">
     <PopoverTrigger as-child>
-      <Button variant="outline" size="sm" class="h-7 text-xs">+ Label</Button>
+      <Button variant="outline" size="sm" class="h-7 text-xs">
+        + Label
+        <span v-if="modelValue.length > 0" class="ml-0.5 rounded-full bg-primary px-1.5 text-primary-foreground">
+          {{ modelValue.length }}
+        </span>
+      </Button>
     </PopoverTrigger>
     <PopoverContent class="w-64 p-2" align="start">
       <div class="max-h-48 space-y-0.5 overflow-y-auto">

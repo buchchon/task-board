@@ -58,10 +58,10 @@ function handleEnd() {
 </script>
 
 <template>
-  <section class="flex flex-col rounded-lg border border-border bg-muted/30 p-3">
+  <section class="flex flex-col rounded-lg border border-primary/15 border-t-2 border-t-primary/50 bg-primary/[0.03] p-3">
     <header class="mb-3 flex items-center justify-between px-1">
       <h2 class="text-sm font-medium text-foreground">{{ label }}</h2>
-      <span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+      <span class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
         {{ tasks.length }}
       </span>
     </header>
@@ -90,7 +90,7 @@ function handleEnd() {
         <template #footer>
           <p
             v-if="items.length === 0"
-            class="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground"
+            class="rounded-md border border-dashed border-primary/25 px-3 py-6 text-center text-xs text-muted-foreground"
           >
             No tasks yet
           </p>

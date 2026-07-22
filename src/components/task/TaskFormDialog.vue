@@ -6,7 +6,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import LabelPicker from './LabelPicker.vue'
 import { useTasks } from '@/composables/useTasks'
+import { labelColorStyles } from '@/types/label'
+import type { Label as LabelData } from '@/types/label'
 import type { Task, TaskPriority } from '@/types/task'
 
 // A null/undefined task means "create"; a real task means "edit" — same
@@ -15,12 +18,13 @@ import type { Task, TaskPriority } from '@/types/task'
 const props = defineProps<{ task?: Task | null }>()
 const open = defineModel<boolean>('open', { required: true })
 
-const { createTask, updateTask } = useTasks()
+const { createTask, updateTask, syncTaskLabels } = useTasks()
 
 const title = ref('')
 const description = ref('')
 const priority = ref<TaskPriority>('normal')
 const dueDate = ref('')
+const selectedLabels = ref<LabelData[]>([])
 const isSubmitting = ref(false)
 
 watch(open, (isOpen) => {
@@ -29,7 +33,12 @@ watch(open, (isOpen) => {
   description.value = props.task?.description ?? ''
   priority.value = props.task?.priority ?? 'normal'
   dueDate.value = props.task?.due_date ?? ''
+  selectedLabels.value = props.task?.labels ? [...props.task.labels] : []
 })
+
+function handleLabelsChange(next: LabelData[]) {
+  selectedLabels.value = next
+}
 
 async function submit() {
   // Guards against double-submit from a fast double-click/Enter — without
@@ -47,8 +56,12 @@ async function submit() {
 
   if (props.task) {
     await updateTask(props.task.id, fields)
+    await syncTaskLabels(props.task.id, props.task.labels, selectedLabels.value)
   } else {
-    await createTask(fields)
+    const created = await createTask(fields)
+    if (created) {
+      await syncTaskLabels(created.id, [], selectedLabels.value)
+    }
   }
 
   isSubmitting.value = false
@@ -92,6 +105,20 @@ async function submit() {
           <div class="space-y-1.5">
             <Label for="task-due-date">Due date</Label>
             <Input id="task-due-date" v-model="dueDate" type="date" />
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <Label>Labels</Label>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span
+              v-for="l in selectedLabels"
+              :key="l.id"
+              :class="['rounded px-1.5 py-0.5 text-xs font-medium', labelColorStyles[l.color]]"
+            >
+              {{ l.name }}
+            </span>
+            <LabelPicker :model-value="selectedLabels" @update:model-value="handleLabelsChange" />
           </div>
         </div>
       </div>

@@ -59,7 +59,7 @@ function handlePointerUp(event: PointerEvent) {
 
 <template>
   <article
-    class="select-none rounded-md border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
+    class="select-none rounded-md border border-border bg-card p-3 shadow-sm transition-all hover:border-primary/30 hover:shadow-md active:cursor-grabbing"
     @pointerdown="handlePointerDown"
     @pointerup="handlePointerUp"
   >
