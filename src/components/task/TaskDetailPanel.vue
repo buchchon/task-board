@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import TaskFormDialog from './TaskFormDialog.vue'
 import LabelPicker from './LabelPicker.vue'
 import TaskActivityLog from './TaskActivityLog.vue'
+import TaskComments from './TaskComments.vue'
 import { useTasks } from '@/composables/useTasks'
 import { useTaskActivity } from '@/composables/useTaskActivity'
 import { labelColorStyles } from '@/types/label'
@@ -52,7 +53,7 @@ function handleLabelsChange(next: Label[]) {
         <SheetTitle>{{ task.title }}</SheetTitle>
       </SheetHeader>
 
-      <div class="space-y-4 px-4">
+      <div class="flex-1 space-y-4 overflow-y-auto px-4">
         <p v-if="task.description" class="text-sm text-muted-foreground">{{ task.description }}</p>
         <p v-else class="text-sm italic text-muted-foreground">No description</p>
 
@@ -75,6 +76,8 @@ function handleLabelsChange(next: Label[]) {
           </span>
           <LabelPicker :model-value="task.labels" @update:model-value="handleLabelsChange" />
         </div>
+
+        <TaskComments :task-id="task.id" />
 
         <TaskActivityLog />
       </div>

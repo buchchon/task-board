@@ -2,11 +2,12 @@
 import { ref } from 'vue'
 import { X, Search } from '@lucide/vue'
 import { COLUMNS } from '@/types/task'
-import type { Task, TaskStatus } from '@/types/task'
+import type { Task, TaskStatus, TaskPriority } from '@/types/task'
 import { useTasks } from '@/composables/useTasks'
 import { Input } from '@/components/ui/input'
 import BoardColumn from './BoardColumn.vue'
 import LabelFilter from './LabelFilter.vue'
+import PriorityFilter from './PriorityFilter.vue'
 import BoardStats from './BoardStats.vue'
 import TaskDetailPanel from '@/components/task/TaskDetailPanel.vue'
 
@@ -14,6 +15,7 @@ const { tasksByStatus, isLoading, error } = useTasks()
 
 const selectedTask = ref<Task | null>(null)
 const selectedLabelIds = ref<string[]>([])
+const selectedPriorities = ref<TaskPriority[]>([])
 const searchQuery = ref('')
 
 function filteredTasks(status: TaskStatus) {
@@ -21,6 +23,10 @@ function filteredTasks(status: TaskStatus) {
 
   if (selectedLabelIds.value.length > 0) {
     tasks = tasks.filter((task) => task.labels.some((label) => selectedLabelIds.value.includes(label.id)))
+  }
+
+  if (selectedPriorities.value.length > 0) {
+    tasks = tasks.filter((task) => selectedPriorities.value.includes(task.priority))
   }
 
   const query = searchQuery.value.trim().toLowerCase()
@@ -57,6 +63,7 @@ function filteredTasks(status: TaskStatus) {
           <Search class="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input v-model="searchQuery" placeholder="Search tasks" class="h-8 w-44 pl-8 text-sm" />
         </div>
+        <PriorityFilter v-model:selected="selectedPriorities" />
         <LabelFilter v-model:selected="selectedLabelIds" />
       </div>
     </div>
