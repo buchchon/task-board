@@ -1,4 +1,4 @@
-# CLAUDE.md — Kanban Task Board
+# Project Notes — Kanban Task Board
 
 Persistent context for this project. Read at the start of every session.
 

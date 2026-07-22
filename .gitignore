@@ -18,7 +18,7 @@ coverage
 # Confidential assessment doc — do not commit to a public repo
 /NP SDE Assessment Challenge.pdf
 
-# Claude Code local tool settings (permissions, etc.) — machine-specific, not project config
+# Local AI coding assistant tool settings — machine-specific, not project config
 .claude/
 
 # Editor directories and files
