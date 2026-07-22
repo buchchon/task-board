@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { X } from '@lucide/vue'
 import { COLUMNS } from '@/types/task'
 import type { Task, TaskStatus } from '@/types/task'
 import { useTasks } from '@/composables/useTasks'
@@ -23,9 +24,17 @@ function filteredTasks(status: TaskStatus) {
   <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
     <div
       v-if="error"
-      class="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+      class="mb-4 flex items-center justify-between gap-3 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
     >
-      {{ error }}
+      <span>{{ error }}</span>
+      <button
+        type="button"
+        class="shrink-0 rounded-sm opacity-70 transition-opacity hover:opacity-100"
+        aria-label="Dismiss"
+        @click="error = null"
+      >
+        <X class="size-4" />
+      </button>
     </div>
 
     <div class="mb-4 flex justify-end">
