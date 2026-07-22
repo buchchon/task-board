@@ -78,6 +78,7 @@ function handleEnd() {
         item-key="id"
         animation="150"
         ghost-class="drag-ghost"
+        fallback-class="drag-fallback"
         :force-fallback="true"
         class="flex min-h-16 flex-col gap-2"
         @change="handleChange"
