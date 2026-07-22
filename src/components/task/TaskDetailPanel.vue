@@ -10,6 +10,7 @@ import { useTasks } from '@/composables/useTasks'
 import { useTaskActivity } from '@/composables/useTaskActivity'
 import { labelColorStyles } from '@/types/label'
 import type { Label } from '@/types/label'
+import { priorityStyles, priorityIcons } from '@/types/task'
 import type { Task } from '@/types/task'
 
 const props = defineProps<{ task: Task | null }>()
@@ -19,12 +20,6 @@ const { deleteTask, syncTaskLabels } = useTasks()
 const { fetchActivity } = useTaskActivity()
 
 const editOpen = ref(false)
-
-const priorityStyles: Record<Task['priority'], string> = {
-  low: 'bg-muted text-muted-foreground',
-  normal: 'bg-secondary text-secondary-foreground',
-  high: 'bg-destructive/10 text-destructive',
-}
 
 watch(
   () => props.task,
@@ -58,7 +53,13 @@ function handleLabelsChange(next: Label[]) {
         <p v-else class="text-sm italic text-muted-foreground">No description</p>
 
         <div class="flex items-center gap-2">
-          <span :class="['rounded px-1.5 py-0.5 text-xs font-medium capitalize', priorityStyles[task.priority]]">
+          <span
+            :class="[
+              'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium capitalize',
+              priorityStyles[task.priority],
+            ]"
+          >
+            <component :is="priorityIcons[task.priority]" class="size-3" />
             {{ task.priority }}
           </span>
           <span v-if="task.due_date" class="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">

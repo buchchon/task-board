@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { priorityStyles, priorityIcons } from '@/types/task'
 import type { Task } from '@/types/task'
-import { labelColorStyles } from '@/types/label'
+import { labelColorStyles, labelSwatchStyles } from '@/types/label'
 
 const props = defineProps<{ task: Task }>()
 const emit = defineEmits<{ select: [task: Task] }>()
-
-const priorityStyles: Record<Task['priority'], string> = {
-  low: 'bg-muted text-muted-foreground',
-  normal: 'bg-secondary text-secondary-foreground',
-  high: 'bg-destructive/10 text-destructive',
-}
 
 // Due-date urgency is a semantic status color (red/amber), layered on top of
 // the neutral+accent base — not part of the one-accent rule, same as Linear/
@@ -58,33 +53,45 @@ function handlePointerUp(event: PointerEvent) {
 
 <template>
   <article
-    class="select-none rounded-md border border-border bg-card p-3 shadow-sm transition-all hover:border-primary/30 hover:shadow-md active:cursor-grabbing"
+    class="select-none overflow-hidden rounded-md border border-border bg-card shadow-sm transition-all hover:border-primary/30 hover:shadow-md active:cursor-grabbing"
     @pointerdown="handlePointerDown"
     @pointerup="handlePointerUp"
   >
-    <div v-if="task.labels.length > 0" class="mb-1.5 flex flex-wrap items-center gap-1">
-      <span
-        v-for="l in task.labels"
-        :key="l.id"
-        :class="['rounded px-1.5 py-0.5 text-[10px] font-medium', labelColorStyles[l.color]]"
-      >
-        {{ l.name }}
-      </span>
+    <div v-if="task.labels.length > 0" class="flex h-1.5">
+      <span v-for="l in task.labels" :key="l.id" :class="['flex-1', labelSwatchStyles[l.color]]" />
     </div>
-    <h3 class="text-sm font-medium leading-snug text-card-foreground">{{ task.title }}</h3>
-    <p v-if="task.description" class="mt-1 line-clamp-2 text-xs text-muted-foreground">
-      {{ task.description }}
-    </p>
-    <div class="mt-3 flex items-center gap-1.5">
-      <span :class="['rounded px-1.5 py-0.5 text-[10px] font-medium capitalize', priorityStyles[task.priority]]">
-        {{ task.priority }}
-      </span>
-      <span
-        v-if="dueDateInfo"
-        :class="['rounded px-1.5 py-0.5 text-[10px] font-medium', dueDateStyles[dueDateInfo.tone]]"
-      >
-        {{ dueDateInfo.label }}
-      </span>
+
+    <div class="p-3">
+      <div v-if="task.labels.length > 0" class="mb-1.5 flex flex-wrap items-center gap-1">
+        <span
+          v-for="l in task.labels"
+          :key="l.id"
+          :class="['rounded px-1.5 py-0.5 text-[10px] font-medium', labelColorStyles[l.color]]"
+        >
+          {{ l.name }}
+        </span>
+      </div>
+      <h3 class="text-sm font-medium leading-snug text-card-foreground">{{ task.title }}</h3>
+      <p v-if="task.description" class="mt-1 line-clamp-2 text-xs text-muted-foreground">
+        {{ task.description }}
+      </p>
+      <div class="mt-3 flex items-center gap-1.5">
+        <span
+          :class="[
+            'inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-medium capitalize',
+            priorityStyles[task.priority],
+          ]"
+        >
+          <component :is="priorityIcons[task.priority]" class="size-2.5" />
+          {{ task.priority }}
+        </span>
+        <span
+          v-if="dueDateInfo"
+          :class="['rounded px-1.5 py-0.5 text-[10px] font-medium', dueDateStyles[dueDateInfo.tone]]"
+        >
+          {{ dueDateInfo.label }}
+        </span>
+      </div>
     </div>
   </article>
 </template>
