@@ -130,23 +130,15 @@
   @apply rounded-md border-2 border-dashed border-primary/40 bg-primary/5 opacity-70;
 }
 
-/* Suppresses the browser's default text-selection-while-dragging behavior,
-   which otherwise highlights whatever the cursor passes over during a
-   force-fallback (mouse-driven) drag. Toggled on body only for the
-   duration of a drag — see BoardColumn's handleStart/handleEnd. */
-body.dragging {
-  @apply select-none;
-}
 .drag-ghost > * {
   @apply invisible;
 }
 
-/* force-fallback mode drags via a plain cloned DOM node, which otherwise has
-   no visual distinction from a resting card. This is the "card lifts with a
-   shadow" from the design spec. Note: no fallback-on-body here — that option
-   broke cursor-tracking last time (the clone froze instead of following the
-   mouse); this is scoped to *only* toggling a class name on the existing
-   clone, nothing about how SortableJS positions it. */
+/* Applied briefly to the card itself as native HTML5 drag-and-drop starts
+   (SortableJS's dragClass) — ideally the browser's own drag-image snapshot
+   picks up the lift before the element falls back to the .drag-ghost
+   placeholder look for the rest of the drag. This is the "card lifts with a
+   shadow" from the design spec. */
 .drag-fallback {
   @apply rotate-1 scale-105 cursor-grabbing shadow-xl;
 }

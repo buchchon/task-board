@@ -43,18 +43,6 @@ function handleChange(event: ChangeEvent) {
     updateTaskStatus(event.added.element.id, props.status)
   }
 }
-
-// force-fallback drags with the mouse instead of native HTML5 DnD, so the
-// browser's normal text-selection-while-dragging behavior is still active
-// and selects everything the cursor passes over. Suppressing selection
-// page-wide only while a drag is in progress avoids that without disabling
-// text selection everywhere (e.g. copying a task's description) normally.
-function handleStart() {
-  document.body.classList.add('dragging')
-}
-function handleEnd() {
-  document.body.classList.remove('dragging')
-}
 </script>
 
 <template>
@@ -78,12 +66,9 @@ function handleEnd() {
         item-key="id"
         animation="150"
         ghost-class="drag-ghost"
-        fallback-class="drag-fallback"
-        :force-fallback="true"
+        drag-class="drag-fallback"
         class="flex min-h-16 flex-1 flex-col gap-2"
         @change="handleChange"
-        @start="handleStart"
-        @end="handleEnd"
       >
         <template #item="{ element }">
           <TaskCard :task="element" @select="emit('select-task', $event)" />

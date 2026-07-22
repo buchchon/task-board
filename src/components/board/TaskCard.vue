@@ -35,11 +35,10 @@ const dueDateStyles = {
   normal: 'bg-muted text-muted-foreground',
 }
 
-// vuedraggable's force-fallback mode (needed for drag to work at all — see
-// BoardColumn) intercepts the mouse interaction in a way that sometimes
-// swallows the native `click` event entirely, even for a plain click with no
-// movement. So "was this a click or a drag" is detected manually here by
-// comparing pointerdown/pointerup position, instead of relying on `click`.
+// vuedraggable/SortableJS's drag handling can swallow the native `click`
+// event even for a plain click with no movement, so "was this a click or a
+// drag" is detected manually here by comparing pointerdown/pointerup
+// position, instead of relying on `click`.
 let pointerDownAt: { x: number; y: number } | null = null
 
 function handlePointerDown(event: PointerEvent) {
